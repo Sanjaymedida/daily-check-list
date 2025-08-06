@@ -1,0 +1,104 @@
+<app-header [userName]="userName"></app-header>
+
+<nav class="nav-bar">
+  <div class="nav-left">
+    <a routerLink="/" class="nav-button">Home</a>
+    <a routerLink="/signup" class="nav-button">Signup</a>
+    <a routerLink="/login" class="nav-button">Login</a>
+  </div>
+  <div class="nav-right">
+    <button class="profile-btn" (click)="toggleSidebar()">👤 Profile</button>
+  </div>
+</nav>
+
+<!-- ✅ Modern Sliding Sidebar -->
+
+<!-- Sidebar Drawer -->
+<div class="sidebar" [class.open]="isSidebarOpen">
+  <button (click)="closeSidebar()" class="text-gray-600 hover:text-black" style="color: #333; background-color: white; border: none; padding: 10px; cursor: pointer;">
+      &larr; </button>
+  <h3>👤 Your Profile</h3>
+  <p><strong>Name:</strong> {{ userName }}</p>
+  <p><strong>Email:</strong> {{ userEmail }}</p>
+  
+
+  <button (click)="logout()">Logout</button>
+
+  <hr />
+  <p>🚧 Upcoming Features:</p>
+  <ul>
+    <li>Edit Profile</li>
+    <li>Weekly Progress</li>
+    <li>Export to PDF</li>
+  </ul>
+</div>
+
+
+
+
+<!-- ✅ Checklist Section -->
+<div class="table-area">
+  <div class="container">
+    <h2>Checklist for: {{ selectedDate | date: 'fullDate' }}</h2>
+
+    <input class="input" type="date" [value]="getFormattedDate(selectedDate)" (change)="onDateSelect($event)" />
+    <button class="today" (click)="goToToday()">Go to Today</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th *ngFor="let task of taskList; let i = index" class="task-header" (mouseenter)="hoverIndex = i" (mouseleave)="hoverIndex = -1">
+            {{ task }}
+            <span *ngIf="hoverIndex === i" class="task-actions">
+              <button (click)="addTask(i)">➕</button>
+              <button (click)="deleteTask(i)">❌</button>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let date of pagedDates"
+          [ngClass]="{ selected: getFormattedDate(date) === getFormattedDate(selectedDate) }"
+        >
+          <td>{{ date | date: 'EEE-MMM, d, yyyy' }}</td>
+          <td *ngFor="let task of taskList">
+            <label [ngClass]="{ 'past-checkbox': isPastDate(getFormattedDate(date)) }">
+              <input
+                type="checkbox"
+                [checked]="getTaskStatus(task, getFormattedDate(date))"
+                (change)="toggleTask(task, getFormattedDate(date))"
+                [disabled]="isPastDate(getFormattedDate(date)) || isFutureDate(getFormattedDate(date))"
+              />
+            </label>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button
+      *ngFor="let page of [].constructor(totalPages); let i = index"
+      [disabled]="currentPage === i + 1"
+      (click)="goToPage(i + 1)">
+      {{ i + 1 }}
+    </button>
+  </div>
+
+  <div class="selected-checklist">
+    <h3>Checklist for {{ getFormattedDate(selectedDate) }}</h3>
+    <div class="checklist-row">
+      <div 
+        *ngFor="let item of selectedDateChecklist"
+        class="checklist-item"
+        [ngClass]="{ 'checked': item.status, 'unchecked': !item.status }"
+      >
+        {{ item.task }} 
+        <span *ngIf="item.status" class="status">✔</span>
+        <span *ngIf="!item.status" class="status">✘</span>
+      </div>
+    </div>
+  </div>
+</div>
